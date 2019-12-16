@@ -1,0 +1,74 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
+
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+
+        externalNativeBuild {
+            cmake {
+//                cppFlags "-frtti -fexceptions"
+//                arguments "-DANDROID_TOOLCHAIN=clang"
+                abiFilters 'armeabi-v7a'
+            }
+        }
+
+        ndk {
+            //打包进APK的ABI类型
+            abiFilters 'armeabi-v7a'
+        }
+
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs 'src/java'
+            jniLibs.srcDirs  'libs'
+//            jniLibs.srcDirs '../libjpeg/prebuilt', 'libs'
+
+            // 这里没有添加libjpeg.so这个动态库，也是可以执行的。
+            // 原因在于android本身使用了 libjpeg.so这个动态库，
+            // 这个库存放在/system/lib下，如果我们没有加入
+            // libjpeg.so的话，他会去/system/lib下加载这个动态库
+
+            // 如果android手机上没有 libjpeg.so这个动态库的话，
+            // 也可以使用: jniLibs.srcDirs '../libjpeg/prebuilt' 'lib'
+            // 将libjpeg.so加入到apk中
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
